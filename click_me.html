@@ -1,0 +1,1379 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🐷 piggyme — World's Cutest Creature Quiz™</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        min-height: 100vh;
+        background: #ffe0f0;
+        font-family: "Nunito", sans-serif;
+        overflow: hidden;
+        position: relative;
+        cursor:
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Cellipse cx='10' cy='12' rx='8' ry='9' fill='%23ff85c2' transform='rotate(-20 10 12)'/%3E%3Cellipse cx='26' cy='12' rx='8' ry='9' fill='%23ff85c2' transform='rotate(20 26 12)'/%3E%3Cellipse cx='10' cy='12' rx='5' ry='6' fill='%23ffb3d9' transform='rotate(-20 10 12)'/%3E%3Cellipse cx='26' cy='12' rx='5' ry='6' fill='%23ffb3d9' transform='rotate(20 26 12)'/%3E%3Ccircle cx='18' cy='22' r='13' fill='%23ffb3d9'/%3E%3Cellipse cx='18' cy='27' rx='8' ry='6' fill='%23ff85c2'/%3E%3Ccircle cx='15' cy='26' r='2.2' fill='%23c2185b' opacity='.6'/%3E%3Ccircle cx='21' cy='26' r='2.2' fill='%23c2185b' opacity='.6'/%3E%3Ccircle cx='12' cy='18' r='4' fill='white'/%3E%3Ccircle cx='24' cy='18' r='4' fill='white'/%3E%3Ccircle cx='13' cy='19' r='2.2' fill='%234a2040'/%3E%3Ccircle cx='25' cy='19' r='2.2' fill='%234a2040'/%3E%3C/svg%3E")
+            18 18,
+          auto;
+      }
+
+      /* TICKER */
+      .ticker-wrap {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 50;
+        background: linear-gradient(
+          90deg,
+          #ff1493,
+          #ff69b4,
+          #ffb6c1,
+          #ff69b4,
+          #ff1493
+        );
+        padding: 7px 0;
+        overflow: hidden;
+      }
+      .ticker-track {
+        display: flex;
+        white-space: nowrap;
+        animation: tickerScroll 32s linear infinite;
+      }
+      .ticker-track span {
+        font-family: "Fredoka One", cursive;
+        font-size: 0.82rem;
+        color: white;
+        padding: 0 28px;
+        letter-spacing: 0.3px;
+      }
+      @keyframes tickerScroll {
+        from {
+          transform: translateX(0);
+        }
+        to {
+          transform: translateX(-50%);
+        }
+      }
+
+      /* BG */
+      .bg {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        overflow: hidden;
+      }
+      .blob {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(55px);
+      }
+      .b1 {
+        width: 480px;
+        height: 480px;
+        background: #ff69b4;
+        opacity: 0.14;
+        top: -160px;
+        left: -160px;
+        animation: blobP 7s ease-in-out infinite;
+      }
+      .b2 {
+        width: 360px;
+        height: 360px;
+        background: #ff1493;
+        opacity: 0.11;
+        bottom: -100px;
+        right: -100px;
+        animation: blobP 9s ease-in-out infinite reverse;
+      }
+      .b3 {
+        width: 240px;
+        height: 240px;
+        background: #ffb6c1;
+        opacity: 0.18;
+        top: 38%;
+        left: 54%;
+        animation: blobP 6s ease-in-out 2s infinite;
+      }
+      .b4 {
+        width: 170px;
+        height: 170px;
+        background: #ff85c2;
+        opacity: 0.17;
+        top: 18%;
+        left: 2%;
+        animation: blobP 8s ease-in-out 1s infinite;
+      }
+      @keyframes blobP {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.14);
+        }
+      }
+
+      /* COUNTERS */
+      .hud {
+        position: fixed;
+        top: 46px;
+        right: 14px;
+        z-index: 60;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .hud-box {
+        background: rgba(255, 255, 255, 0.9);
+        border: 2.5px solid #ffb3d9;
+        border-radius: 20px;
+        padding: 7px 14px;
+        font-family: "Fredoka One", cursive;
+        font-size: 0.85rem;
+        color: #c2185b;
+        box-shadow: 0 4px 16px rgba(255, 105, 180, 0.18);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .hud-num {
+        font-size: 1.25rem;
+        color: #ff1493;
+        transition: transform 0.15s;
+      }
+      .hud-num.pop {
+        transform: scale(1.6);
+      }
+
+      /* PROGRESS */
+      .prog-box {
+        position: fixed;
+        top: 46px;
+        left: 14px;
+        z-index: 60;
+        background: rgba(255, 255, 255, 0.9);
+        border: 2.5px solid #ffb3d9;
+        border-radius: 20px;
+        padding: 8px 14px;
+        font-family: "Fredoka One", cursive;
+        font-size: 0.8rem;
+        color: #c2185b;
+        box-shadow: 0 4px 16px rgba(255, 105, 180, 0.18);
+        min-width: 155px;
+      }
+      .prog-label {
+        margin-bottom: 5px;
+      }
+      .prog-bar {
+        height: 10px;
+        background: #ffe0f0;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .prog-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #ff69b4, #ff1493);
+        border-radius: 10px;
+        transition: width 0.3s ease;
+        width: 0%;
+      }
+
+      /* CORNER PIGS */
+      .cp {
+        position: fixed;
+        font-size: 38px;
+        z-index: 6;
+        pointer-events: none;
+      }
+      .cp1 {
+        top: 46px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 28px;
+        animation: cpW 2.2s ease-in-out infinite;
+      }
+      .cp2 {
+        bottom: 56px;
+        left: 8px;
+        animation: cpW 1.9s ease-in-out 0.4s infinite;
+      }
+      .cp3 {
+        bottom: 56px;
+        right: 8px;
+        animation: cpW 2.4s ease-in-out 0.8s infinite;
+      }
+      @keyframes cpW {
+        0%,
+        100% {
+          transform: rotate(-10deg) scale(1);
+        }
+        50% {
+          transform: rotate(10deg) scale(1.15);
+        }
+      }
+
+      /* WALKING PIGS */
+      .wpig {
+        position: fixed;
+        bottom: 12px;
+        z-index: 5;
+        pointer-events: none;
+        animation: walkA linear infinite;
+      }
+      @keyframes walkA {
+        0% {
+          transform: translateX(-90px) scaleX(1);
+        }
+        49% {
+          transform: translateX(110vw) scaleX(1);
+        }
+        50% {
+          transform: translateX(110vw) scaleX(-1);
+        }
+        99% {
+          transform: translateX(-90px) scaleX(-1);
+        }
+        100% {
+          transform: translateX(-90px) scaleX(1);
+        }
+      }
+
+      /* MAIN CARD */
+      .card {
+        position: relative;
+        z-index: 10;
+        background: rgba(255, 255, 255, 0.88);
+        backdrop-filter: blur(12px);
+        border: 3px solid #ffb3d9;
+        border-radius: 36px;
+        padding: 34px 44px 26px;
+        max-width: 560px;
+        width: 92%;
+        margin: 0 auto;
+        margin-top: 66px;
+        text-align: center;
+        box-shadow:
+          0 12px 60px rgba(255, 105, 180, 0.2),
+          inset 0 2px 0 #ffb3d9;
+      }
+
+      /* PIG SVG */
+      .pig-wrap {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 8px;
+      }
+      .pig-svg {
+        width: 115px;
+        height: 115px;
+        animation: pigB 1.7s ease-in-out infinite;
+        filter: drop-shadow(0 6px 12px rgba(255, 105, 180, 0.3));
+      }
+      .pig-svg.shocked {
+        animation: pigS 0.35s ease 3;
+      }
+      .pig-svg.offended {
+        animation: pigO 0.45s ease 2;
+      }
+      .pig-svg.happy {
+        animation: pigH 0.75s ease-in-out infinite;
+      }
+      @keyframes pigB {
+        0%,
+        100% {
+          transform: translateY(0) rotate(-3deg);
+        }
+        50% {
+          transform: translateY(-15px) rotate(3deg);
+        }
+      }
+      @keyframes pigS {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.35) rotate(12deg);
+        }
+      }
+      @keyframes pigO {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-9px);
+        }
+        75% {
+          transform: translateX(9px);
+        }
+      }
+      @keyframes pigH {
+        0%,
+        100% {
+          transform: translateY(0) scale(1) rotate(-3deg);
+        }
+        50% {
+          transform: translateY(-20px) scale(1.12) rotate(3deg);
+        }
+      }
+
+      /* SPEECH BUBBLE */
+      .bubble {
+        position: absolute;
+        top: -18px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        border: 2px solid #ffb3d9;
+        border-radius: 16px;
+        padding: 5px 13px;
+        font-size: 0.76rem;
+        font-weight: 800;
+        color: #c2185b;
+        white-space: nowrap;
+        z-index: 20;
+        box-shadow: 0 3px 10px rgba(255, 105, 180, 0.15);
+        pointer-events: none;
+        transition: opacity 0.3s;
+      }
+      .bubble::after {
+        content: "";
+        position: absolute;
+        bottom: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 4px solid transparent;
+        border-top-color: #ffb3d9;
+      }
+
+      h1 {
+        font-family: "Fredoka One", cursive;
+        font-size: 1.8rem;
+        color: #c2185b;
+        margin-bottom: 4px;
+        line-height: 1.2;
+      }
+      .sub {
+        color: #e91e8c;
+        font-size: 0.88rem;
+        font-weight: 700;
+        margin-bottom: 18px;
+        opacity: 0.85;
+      }
+      .question {
+        font-family: "Fredoka One", cursive;
+        font-size: 1.18rem;
+        color: #ad1457;
+        margin-bottom: 13px;
+        background: #ffe4f0;
+        border-radius: 18px;
+        padding: 11px 16px;
+        border: 2px dashed #ff80bc;
+      }
+
+      .hints {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-bottom: 14px;
+      }
+      .htag {
+        background: #ffe0f0;
+        border: 1.5px solid #ffb3d9;
+        color: #c2185b;
+        border-radius: 50px;
+        padding: 3px 11px;
+        font-size: 0.76rem;
+        font-weight: 700;
+        transition: transform 0.2s;
+        cursor: default;
+      }
+      .htag:hover {
+        transform: scale(1.1) rotate(-3deg);
+      }
+
+      .inp-w {
+        position: relative;
+        margin-bottom: 8px;
+      }
+      input[type="text"] {
+        width: 100%;
+        padding: 12px 18px;
+        border-radius: 50px;
+        border: 2.5px solid #ffb3d9;
+        background: #fff0f8;
+        font-size: 1.05rem;
+        font-family: "Nunito", sans-serif;
+        font-weight: 800;
+        color: #880e4f;
+        outline: none;
+        transition:
+          border 0.2s,
+          box-shadow 0.2s;
+        text-align: center;
+      }
+      input:focus {
+        border-color: #ff1493;
+        box-shadow: 0 0 0 4px rgba(255, 20, 147, 0.12);
+      }
+      input::placeholder {
+        color: #ffb3d9;
+        font-weight: 600;
+      }
+      input.wrong {
+        border-color: #ff4444;
+        animation: shake 0.4s ease;
+      }
+      input.right {
+        border-color: #4caf50;
+        box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.15);
+      }
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-9px);
+        }
+        75% {
+          transform: translateX(9px);
+        }
+      }
+
+      .msg-line {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #c2185b;
+        min-height: 24px;
+        transition: all 0.22s;
+        font-family: "Nunito", sans-serif;
+        margin-top: 4px;
+      }
+
+      /* SUBMIT BTN */
+      #sbtn {
+        position: fixed;
+        padding: 13px 36px;
+        background: linear-gradient(135deg, #ff69b4, #ff1493);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-family: "Fredoka One", cursive;
+        cursor: none;
+        z-index: 9999;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+        box-shadow: 0 6px 24px rgba(255, 20, 147, 0.4);
+      }
+      #sbtn.locked {
+        background: linear-gradient(135deg, #56c96a, #2e7d32);
+        box-shadow: 0 6px 28px rgba(76, 175, 80, 0.5);
+        cursor: pointer;
+        animation: readyP 1s ease-in-out infinite;
+      }
+      @keyframes readyP {
+        0%,
+        100% {
+          box-shadow: 0 6px 24px rgba(76, 175, 80, 0.5);
+        }
+        50% {
+          box-shadow: 0 8px 44px rgba(76, 175, 80, 0.85);
+        }
+      }
+
+      /* SPARKLE */
+      .spark {
+        position: fixed;
+        pointer-events: none;
+        z-index: 8000;
+        font-size: 15px;
+        animation: sparkF 0.8s ease forwards;
+      }
+      @keyframes sparkF {
+        0% {
+          transform: scale(1) translateY(0);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(0) translateY(-32px);
+          opacity: 0;
+        }
+      }
+
+      /* FOOTPRINT */
+      .footp {
+        position: fixed;
+        pointer-events: none;
+        z-index: 8001;
+        font-size: 17px;
+        opacity: 0.5;
+        animation: footF 1.2s ease forwards;
+      }
+      @keyframes footF {
+        0% {
+          opacity: 0.5;
+        }
+        100% {
+          opacity: 0;
+          transform: scale(0.6);
+        }
+      }
+
+      /* OINK POP */
+      .oinkp {
+        position: fixed;
+        font-family: "Fredoka One", cursive;
+        font-size: 1.35rem;
+        color: #ff1493;
+        pointer-events: none;
+        z-index: 9000;
+        animation: oinkA 0.9s ease forwards;
+      }
+      @keyframes oinkA {
+        0% {
+          transform: scale(0) rotate(-12deg);
+          opacity: 1;
+        }
+        55% {
+          transform: scale(1.35) rotate(6deg);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(1) translateY(-44px);
+          opacity: 0;
+        }
+      }
+
+      /* FLOATERS */
+      .floater {
+        position: fixed;
+        pointer-events: none;
+        z-index: 2;
+        user-select: none;
+        animation: floatUp linear infinite;
+      }
+      @keyframes floatUp {
+        0% {
+          transform: translateY(105vh) rotate(0deg);
+          opacity: 0.7;
+        }
+        100% {
+          transform: translateY(-130px) rotate(380deg);
+          opacity: 0;
+        }
+      }
+
+      /* WIN SCREEN */
+      .win {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 999999;
+        background: linear-gradient(135deg, #ff1493, #ff69b4, #ffb6c1);
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-family: "Fredoka One", cursive;
+        color: white;
+        text-align: center;
+        padding: 40px;
+      }
+      .win.on {
+        display: flex;
+        animation: winB 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      @keyframes winB {
+        from {
+          transform: scale(0.65);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      .wpigs {
+        font-size: 3rem;
+        letter-spacing: 10px;
+        animation: wpA 0.7s ease-in-out infinite alternate;
+      }
+      @keyframes wpA {
+        from {
+          transform: scale(1);
+        }
+        to {
+          transform: scale(1.13) rotate(6deg);
+        }
+      }
+      .wtitle {
+        font-size: 3rem;
+        margin: 14px 0 6px;
+        text-shadow: 0 4px 0 rgba(0, 0, 0, 0.12);
+      }
+      .wbadge {
+        background: rgba(255, 255, 255, 0.22);
+        backdrop-filter: blur(8px);
+        border: 2px solid rgba(255, 255, 255, 0.38);
+        border-radius: 24px;
+        padding: 16px 28px;
+        margin: 12px 0;
+        font-size: 1.15rem;
+        max-width: 380px;
+      }
+      .wsub {
+        font-size: 0.95rem;
+        font-family: "Nunito", sans-serif;
+        font-weight: 700;
+        opacity: 0.9;
+      }
+      .wcert {
+        background: rgba(255, 255, 255, 0.15);
+        border: 2px dashed rgba(255, 255, 255, 0.5);
+        border-radius: 16px;
+        padding: 10px 22px;
+        margin-top: 14px;
+        font-size: 0.9rem;
+      }
+      .wclose {
+        margin-top: 18px;
+        padding: 9px 28px;
+        background: rgba(255, 255, 255, 0.22);
+        border: 2px solid rgba(255, 255, 255, 0.55);
+        border-radius: 50px;
+        color: white;
+        font-family: "Fredoka One", cursive;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .wclose:hover {
+        background: rgba(255, 255, 255, 0.38);
+      }
+
+      @media (max-width: 520px) {
+        .card {
+          padding: 24px 16px 20px;
+          margin-top: 62px;
+        }
+        h1 {
+          font-size: 1.38rem;
+        }
+        .pig-svg {
+          width: 85px;
+          height: 85px;
+        }
+        .hud,
+        .prog-box {
+          font-size: 0.74rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- TICKER -->
+    <div class="ticker-wrap"><div class="ticker-track" id="ticker"></div></div>
+
+    <!-- BG -->
+    <div class="bg">
+      <div class="blob b1"></div>
+      <div class="blob b2"></div>
+      <div class="blob b3"></div>
+      <div class="blob b4"></div>
+    </div>
+
+    <!-- HUD -->
+    <div class="hud">
+      <div class="hud-box">
+        🏃 Escaped <span class="hud-num" id="escNum">0</span>x
+      </div>
+      <div class="hud-box">
+        😤 Rage: <span class="hud-num" id="rageNum">0</span>%
+      </div>
+    </div>
+    <div class="prog-box">
+      <div class="prog-label" id="progLabel">🐽 Answer warmth…</div>
+      <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
+    </div>
+
+    <!-- CORNER PIGS -->
+    <div class="cp cp1">🐷✨🐷</div>
+    <div class="cp cp2">🐖</div>
+    <div class="cp cp3">🐽</div>
+
+    <!-- FLOATERS -->
+    <div id="floaters"></div>
+
+    <!-- MAIN CARD -->
+    <div class="card">
+      <div class="pig-wrap">
+        <div class="bubble" id="bubble">Hmm… who could it be? 🤔</div>
+        <svg
+          class="pig-svg"
+          id="pigSvg"
+          viewBox="0 0 120 120"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <ellipse
+            cx="27"
+            cy="33"
+            rx="19"
+            ry="23"
+            fill="#ff85c2"
+            transform="rotate(-18 27 33)"
+          />
+          <ellipse
+            cx="93"
+            cy="33"
+            rx="19"
+            ry="23"
+            fill="#ff85c2"
+            transform="rotate(18 93 33)"
+          />
+          <ellipse
+            cx="27"
+            cy="33"
+            rx="12"
+            ry="15"
+            fill="#ffb3d9"
+            transform="rotate(-18 27 33)"
+          />
+          <ellipse
+            cx="93"
+            cy="33"
+            rx="12"
+            ry="15"
+            fill="#ffb3d9"
+            transform="rotate(18 93 33)"
+          />
+          <circle cx="60" cy="68" r="46" fill="#ffb3d9" />
+          <ellipse
+            cx="34"
+            cy="80"
+            rx="13"
+            ry="8"
+            fill="#ff85c2"
+            opacity=".45"
+          />
+          <ellipse
+            cx="86"
+            cy="80"
+            rx="13"
+            ry="8"
+            fill="#ff85c2"
+            opacity=".45"
+          />
+          <circle cx="44" cy="60" r="9.5" fill="white" />
+          <circle cx="76" cy="60" r="9.5" fill="white" />
+          <circle id="eL" cx="46" cy="61" r="5.5" fill="#3d1a33" />
+          <circle id="eR" cx="78" cy="61" r="5.5" fill="#3d1a33" />
+          <circle cx="47.5" cy="59" r="2" fill="white" />
+          <circle cx="79.5" cy="59" r="2" fill="white" />
+          <ellipse cx="60" cy="82" rx="18" ry="13" fill="#ff85c2" />
+          <circle cx="53" cy="81" r="5" fill="#c2185b" opacity=".48" />
+          <circle cx="67" cy="81" r="5" fill="#c2185b" opacity=".48" />
+          <path
+            id="mth"
+            d="M50 93 Q60 102 70 93"
+            stroke="#c2185b"
+            stroke-width="2.5"
+            fill="none"
+            stroke-linecap="round"
+          />
+          <g id="crown" opacity="0">
+            <polygon
+              points="60,6 69,24 82,17 75,35 45,35 38,17 51,24"
+              fill="#ffd700"
+            />
+            <circle cx="60" cy="8" r="4" fill="#ff69b4" />
+            <circle cx="81" cy="18" r="3" fill="#ff1493" />
+            <circle cx="39" cy="18" r="3" fill="#ff1493" />
+            <text
+              x="60"
+              y="31"
+              text-anchor="middle"
+              font-size="10"
+              fill="#c8860a"
+            >
+              ★
+            </text>
+          </g>
+          <!-- sweat drop (hidden) -->
+          <ellipse
+            id="sweat"
+            cx="92"
+            cy="46"
+            rx="5"
+            ry="7"
+            fill="#88ccff"
+            opacity="0"
+          />
+        </svg>
+      </div>
+
+      <h1>The Official Cutest<br />Creature Quiz™</h1>
+      <p class="sub">
+        🏆 Certified by the International Pig Council since 1847
+      </p>
+
+      <div class="question">
+        🤔 What is the cutest creature in the<br />whole entire universe? 🌍
+        Think hard.
+      </div>
+
+      <div class="hints" id="hints">
+        <span class="htag">🐶 Nope</span>
+        <span class="htag">🐱 Wrong</span>
+        <span class="htag">🐹 Try again</span>
+        <span class="htag">🦆 Absolutely not</span>
+        <span class="htag">🐸 Lol no</span>
+        <span class="htag">🐨 Nuh-uh</span>
+      </div>
+
+      <div class="inp-w">
+        <input
+          type="text"
+          id="ans"
+          placeholder="Your answer here… 🐽"
+          autocomplete="off"
+          spellcheck="false"
+        />
+      </div>
+      <div class="msg-line" id="msg">
+        👆 The button has very strong opinions. Proceed carefully.
+      </div>
+    </div>
+
+    <!-- SUBMIT -->
+    <button id="sbtn">🐽 Submit Answer</button>
+
+    <!-- WIN -->
+    <div class="win" id="win">
+      <div class="wpigs">🐷🐷🐷🐷🐷</div>
+      <div class="wtitle">🎉 CORRECT!! 🎉</div>
+      <div class="wbadge">
+        ✨ <strong>Nikithaaaaaa</strong> is officially, scientifically, and
+        legally the cutest creature to ever exist in any known or unknown
+        galaxy! ✨
+      </div>
+      <div class="wsub">
+        You have unlocked the sacred title:<br /><span
+          style="
+            font-family: &quot;Fredoka One&quot;, cursive;
+            font-size: 1.5rem;
+          "
+          >🐽 PIGGGYYYYY QUEEEENNNOOOOOOO 🐽</span
+        >
+      </div>
+      <div class="wcert">
+        📜 Certificate #PIG-$(Math.floor(Math.random()*99999)) issued by piggyme
+        HQ
+      </div>
+      <button class="wclose" id="wclose">Oink! Play Again 🐷</button>
+    </div>
+
+    <script>
+      /* TICKER */
+      const facts = [
+        "🐷 Pigs are actually smarter than dogs  •",
+        "🌸 piggyme = cutest creature ever, certified  •",
+        "🐽 Pigs can't look up at the sky so they stare at you with their whole heart  •",
+        "💕 A group of pigs is called a drift — cutest word ever  •",
+        "🐷 Pigs dream in their sleep, probably about being called cute  •",
+        "✨ The answer is piggyme. It's always been piggyme  •",
+        "🐖 Pigs remember everything. EVERYTHING. They remember you chose wrong  •",
+        "🌸 Baby pigs are called piglets which is literally the sweetest word in the dictionary  •",
+        "💖 Pig curly tails are nature's greatest engineering achievement  •",
+        "🐽 Scientists say pig photos reduce stress by 84% (source: piggyme institute, 2024)  •",
+        "🎀 Pigs communicate with 20+ different oinks  •",
+        "🩷 The color pink was invented to match pig vibes  •",
+      ];
+      const tk = document.getElementById("ticker");
+      [...facts, ...facts].forEach((f) => {
+        const s = document.createElement("span");
+        s.textContent = f;
+        tk.appendChild(s);
+      });
+
+      /* WALKING PIGS */
+      ["🐷", "🐽", "🐖"].forEach((e, i) => {
+        const p = document.createElement("div");
+        p.className = "wpig";
+        p.textContent = e;
+        p.style.animationDuration = 14 + i * 6 + "s";
+        p.style.animationDelay = i * 4.5 + "s";
+        p.style.bottom = 10 + i * 18 + "px";
+        p.style.fontSize = 22 + i * 9 + "px";
+        document.body.appendChild(p);
+      });
+
+      /* FLOATERS */
+      [
+        "🌸",
+        "💕",
+        "🐷",
+        "🎀",
+        "✨",
+        "💖",
+        "🐽",
+        "🌷",
+        "🩷",
+        "🎊",
+        "🩰",
+        "🌺",
+      ].forEach((em, i) => {
+        const el = document.createElement("div");
+        el.className = "floater";
+        el.textContent = em;
+        el.style.cssText = `font-size:${16 + Math.random() * 18}px;opacity:.11;left:${Math.random() * 94}vw;animation-duration:${9 + Math.random() * 9}s;animation-delay:${Math.random() * 7}s;`;
+        document.getElementById("floaters").appendChild(el);
+      });
+
+      /* REFS */
+      const btn = document.getElementById("sbtn");
+      const inp = document.getElementById("ans");
+      const msg = document.getElementById("msg");
+      const win = document.getElementById("win");
+      const pig = document.getElementById("pigSvg");
+      const bubble = document.getElementById("bubble");
+      const progFill = document.getElementById("progFill");
+      const progLabel = document.getElementById("progLabel");
+      const escNum = document.getElementById("escNum");
+      const rageNum = document.getElementById("rageNum");
+      const eL = document.getElementById("eL");
+      const eR = document.getElementById("eR");
+      const mth = document.getElementById("mth");
+      const crown = document.getElementById("crown");
+      const sweat = document.getElementById("sweat");
+
+      const TARGET = "piggyme";
+      let btnX = window.innerWidth / 2 - 80;
+      let btnY = window.innerHeight - 120;
+      let isLocked = false;
+      let esc = 0;
+      let rage = 0;
+      let lastSpark = 0;
+
+      const quips = [
+        "Nope! 🏃 Not today!",
+        "Catch me if you can! 🐽",
+        "You'll NEVER catch me! 💅",
+        "Wrong answer energy 👀",
+        "piggyme doesn't accept that! 🐷",
+        "I'm faster than WiFi! 💨",
+        "Have you considered… piggyme? 🤔",
+        "Hint: starts with P-I-G 🐽",
+        "The button is judging you 😤",
+        "Try again. I DARE you. 😂",
+        "This button does cardio! 🏋️",
+        "Speed 100. You: 0. 🐷",
+        "PSYCHE! 🎭",
+        "Not even close bestie 💅",
+        "My lawyer says no comment 🐷",
+        "The button is NOT accepting applications 🚫",
+        "Error 404: correct answer not found 💻",
+        "Have you tried turning yourself off and on again? 🔄",
+      ];
+      const bubbles = {
+        idle: [
+          "Hmm… who could it be? 🤔",
+          "Think carefully… 👀",
+          "The answer is obvious! 🐽",
+          "I believe in you! 💕",
+          "Oink oink! 🐷",
+          "I'm waiting… 🐽",
+          "*judges silently* 👀",
+        ],
+        wrong: [
+          "Excuse me?? 😤",
+          "That is WRONG. 😒",
+          "How dare you! 🐽",
+          "OINK loudly in offense 🐖",
+          "...Really? 🙄",
+          "I am personally offended 😡",
+        ],
+        close: [
+          "Getting warmer!! 🌡️",
+          "Oh you're SO close! 👀",
+          "Keep going!!! 🌸",
+          "Almost!!!! 💕",
+          "I can feel it!! 🐷",
+        ],
+        right: [
+          "FINALLY!!!! 🎉",
+          "I KNEW YOU'D GET IT! 🐷",
+          "YES YES YES! 💖",
+          "OINK OINK OINK! 🎊",
+          "MY HERO!!!! 🏆",
+        ],
+        offended: [
+          "Did you just say DUCK?! 😡",
+          "NOT A CAT. 😾",
+          "Dogs??? OUTRAGEOUS 😤",
+          "A HAMSTER?? Shocking 😲",
+          "I am in literal tears rn 😭",
+        ],
+      };
+      let bubInt = setInterval(() => {
+        if (!isLocked) setBubble("idle");
+      }, 3800);
+
+      function setBubble(type) {
+        const arr = bubbles[type] || bubbles.idle;
+        bubble.textContent = arr[Math.floor(Math.random() * arr.length)];
+      }
+
+      /* EYES FOLLOW CURSOR */
+      document.addEventListener("mousemove", (e) => {
+        const r = pig.getBoundingClientRect();
+        const cx = r.left + r.width / 2,
+          cy = r.top + r.height / 2;
+        const ang = Math.atan2(e.clientY - cy, e.clientX - cx);
+        const d = 3.2;
+        eL.setAttribute(
+          "cx",
+          Math.max(40, Math.min(52, 46 + Math.cos(ang) * d)),
+        );
+        eL.setAttribute(
+          "cy",
+          Math.max(57, Math.min(65, 61 + Math.sin(ang) * d)),
+        );
+        eR.setAttribute(
+          "cx",
+          Math.max(72, Math.min(84, 78 + Math.cos(ang) * d)),
+        );
+        eR.setAttribute(
+          "cy",
+          Math.max(57, Math.min(65, 61 + Math.sin(ang) * d)),
+        );
+        spawnSpark(e.clientX, e.clientY);
+        fleBtn(e.clientX, e.clientY);
+      });
+
+      /* SPARKLE TRAIL */
+      const sparks = ["✨", "🌸", "💕", "⭐", "🩷", "💫", "🌺", "🎀"];
+      function spawnSpark(x, y) {
+        const now = Date.now();
+        if (now - lastSpark < 75) return;
+        lastSpark = now;
+        const s = document.createElement("div");
+        s.className = "spark";
+        s.textContent = sparks[Math.floor(Math.random() * sparks.length)];
+        s.style.left = x + Math.random() * 22 - 11 + "px";
+        s.style.top = y + Math.random() * 22 - 11 + "px";
+        document.body.appendChild(s);
+        setTimeout(() => s.remove(), 850);
+      }
+
+      /* OINK SOUND */
+      function oink(freq = 320) {
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const o = ctx.createOscillator(),
+            g = ctx.createGain();
+          o.connect(g);
+          g.connect(ctx.destination);
+          o.type = "sine";
+          o.frequency.setValueAtTime(freq, ctx.currentTime);
+          o.frequency.exponentialRampToValueAtTime(
+            freq * 0.56,
+            ctx.currentTime + 0.18,
+          );
+          o.frequency.exponentialRampToValueAtTime(
+            freq * 0.87,
+            ctx.currentTime + 0.33,
+          );
+          g.gain.setValueAtTime(0.16, ctx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.46);
+          o.start();
+          o.stop(ctx.currentTime + 0.46);
+        } catch (e) {}
+      }
+
+      /* OINK POP */
+      function showOink(x, y, txt) {
+        const el = document.createElement("div");
+        el.className = "oinkp";
+        el.textContent = txt || "OINK!";
+        el.style.left = x + "px";
+        el.style.top = y + "px";
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1000);
+      }
+
+      /* FOOTPRINT */
+      function footprint(x, y) {
+        const el = document.createElement("div");
+        el.className = "footp";
+        el.textContent = "🐾";
+        el.style.cssText += `left:${x + Math.random() * 28 - 14}px;top:${y + Math.random() * 18 - 9}px;transform:rotate(${Math.random() * 360}deg);`;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1400);
+      }
+
+      /* BUTTON */
+      function placeBtn(x, y) {
+        const bw = btn.offsetWidth,
+          bh = btn.offsetHeight;
+        btnX = Math.max(8, Math.min(window.innerWidth - bw - 8, x));
+        btnY = Math.max(44, Math.min(window.innerHeight - bh - 8, y));
+        btn.style.left = btnX + "px";
+        btn.style.top = btnY + "px";
+      }
+      placeBtn(btnX, btnY);
+
+      function randPos() {
+        const bw = btn.offsetWidth,
+          bh = btn.offsetHeight;
+        return {
+          x: Math.random() * (window.innerWidth - bw - 20) + 10,
+          y: Math.random() * (window.innerHeight - bh - 20) + 44,
+        };
+      }
+
+      function fleBtn(mx, my) {
+        if (isLocked) return;
+        const bw = btn.offsetWidth,
+          bh = btn.offsetHeight;
+        const cx = btnX + bw / 2,
+          cy = btnY + bh / 2;
+        const dist = Math.sqrt((mx - cx) ** 2 + (my - cy) ** 2);
+        if (dist < 155) {
+          esc++;
+          rage = Math.min(100, rage + 2);
+          escNum.textContent = esc;
+          rageNum.textContent = rage;
+          escNum.classList.add("pop");
+          setTimeout(() => escNum.classList.remove("pop"), 180);
+          const p = randPos();
+          footprint(btnX, btnY);
+          btn.style.transition =
+            "left .2s cubic-bezier(.25,.8,.25,1.6),top .2s cubic-bezier(.25,.8,.25,1.6)";
+          placeBtn(p.x, p.y);
+          oink(280 + Math.random() * 120);
+          if (esc % 2 === 0)
+            showOink(
+              mx,
+              my - 24,
+              esc > 25
+                ? "NEVER!! 😂"
+                : quips[Math.floor(Math.random() * quips.length)],
+            );
+          sweat.setAttribute(
+            "opacity",
+            Math.min(0.9, (rage / 100) * 1.2).toString(),
+          );
+          if (esc % 5 === 0) {
+            msg.textContent = quips[Math.floor(Math.random() * quips.length)];
+            setBubble("wrong");
+          }
+          pig.className = "pig-svg shocked";
+          setTimeout(() => (pig.className = "pig-svg"), 650);
+          setTimeout(() => (btn.style.transition = ""), 250);
+        }
+      }
+
+      /* INPUT */
+      const offended = [
+        "cat",
+        "cats",
+        "dog",
+        "dogs",
+        "hamster",
+        "duck",
+        "rabbit",
+        "fish",
+        "bird",
+        "horse",
+        "cow",
+        "snake",
+        "frog",
+        "monkey",
+        "panda",
+        "koala",
+        "bear",
+        "lion",
+      ];
+      inp.addEventListener("input", () => {
+        const val = inp.value.trim().toLowerCase();
+        const matchLen = getMatch(val);
+        const prog = Math.round((matchLen / TARGET.length) * 100);
+        progFill.style.width = prog + "%";
+
+        const warmLabels = [
+          "🐽 Ice cold…",
+          "🌡️ Barely warm…",
+          "🌸 Getting there…",
+          "🔥 Hot hot hot!",
+          "🐷 SO CLOSE!!!",
+          "✨ Almost perfect!",
+        ];
+        progLabel.textContent = warmLabels[Math.min(5, Math.floor(prog / 18))];
+
+        if (val === TARGET) {
+          isLocked = true;
+          btn.classList.add("locked");
+          btn.textContent = "✅ CLICK ME NOW!! 🐷";
+          msg.textContent =
+            "🎉 THE BUTTON ACCEPTS YOU! It glides home for you!";
+          inp.className = "right";
+          crown.setAttribute("opacity", "1");
+          sweat.setAttribute("opacity", "0");
+          mth.setAttribute("d", "M44 90 Q60 110 76 90");
+          setBubble("right");
+          pig.className = "pig-svg happy";
+          const cx = window.innerWidth / 2 - btn.offsetWidth / 2;
+          const cy = window.innerHeight / 2 + 80;
+          btn.style.transition =
+            "left .55s cubic-bezier(.34,1.56,.64,1),top .55s cubic-bezier(.34,1.56,.64,1)";
+          placeBtn(cx, cy);
+          oink(400);
+          setTimeout(() => oink(480), 200);
+          setTimeout(() => oink(360), 400);
+          setTimeout(() => (btn.style.transition = ""), 700);
+        } else {
+          if (isLocked) {
+            isLocked = false;
+            btn.classList.remove("locked");
+            btn.textContent = "🐽 Submit Answer";
+            inp.className = "";
+            crown.setAttribute("opacity", "0");
+            mth.setAttribute("d", "M50 93 Q60 102 70 93");
+            pig.className = "pig-svg";
+          }
+          if (offended.includes(val)) {
+            inp.className = "wrong";
+            setBubble("offended");
+            pig.className = "pig-svg offended";
+            msg.textContent =
+              "😡 HOW DARE YOU?! That is NOT the cutest creature!";
+            oink(180);
+            setTimeout(() => {
+              inp.className = "";
+              pig.className = "pig-svg";
+            }, 900);
+          } else if (prog >= 71) {
+            setBubble("close");
+            msg.textContent = "🔥 SO CLOSE! Keep typing!!!";
+          } else if (prog >= 35) {
+            setBubble("close");
+            msg.textContent = "🌡️ Getting warmer… you can do it!";
+          } else if (val.length > 0) {
+            msg.textContent = "❌ Nope! Try harder. Pig hint: 🐽 oink oink.";
+          } else {
+            msg.textContent =
+              "👆 The button has opinions. Choose your words wisely.";
+            setBubble("idle");
+          }
+        }
+      });
+
+      function getMatch(val) {
+        let c = 0;
+        for (let i = 0; i < Math.min(val.length, TARGET.length); i++) {
+          if (val[i] === TARGET[i]) c++;
+          else break;
+        }
+        return c;
+      }
+
+      /* BUTTON CLICK */
+      btn.addEventListener("click", () => {
+        if (!isLocked) {
+          const p = randPos();
+          btn.style.transition = "left .17s ease,top .17s ease";
+          placeBtn(p.x, p.y);
+          showOink(btnX, btnY, "Nice try! 😂");
+          oink(240);
+          setTimeout(() => (btn.style.transition = ""), 220);
+          return;
+        }
+        win.classList.add("on");
+        confetti();
+        oink(420);
+        setTimeout(() => oink(520), 180);
+        setTimeout(() => oink(380), 360);
+      });
+
+      /* CONFETTI */
+      function confetti() {
+        const cols = [
+          "#ff69b4",
+          "#ff1493",
+          "#ffb6c1",
+          "#ffd700",
+          "#ff4081",
+          "#fff",
+          "#ff85c2",
+        ];
+        for (let i = 0; i < 90; i++) {
+          const d = document.createElement("div");
+          const sz = Math.random() * 14 + 5;
+          d.style.cssText = `position:fixed;width:${sz}px;height:${sz}px;background:${cols[Math.floor(Math.random() * cols.length)]};border-radius:50%;left:${Math.random() * 100}vw;bottom:-24px;z-index:999998;pointer-events:none;animation:floatUp ${2 + Math.random() * 3}s linear ${Math.random() * 2}s forwards;`;
+          document.body.appendChild(d);
+          setTimeout(() => d.remove(), 7000);
+        }
+        ["🐷", "🐽", "🎉", "🌸", "💖", "🎊", "🩷", "🌺", "✨"].forEach(
+          (em, i) => {
+            const p = document.createElement("div");
+            p.style.cssText = `position:fixed;font-size:${2 + Math.random()}rem;left:${Math.random() * 84 + 8}vw;bottom:-24px;z-index:999998;pointer-events:none;animation:floatUp ${3 + Math.random() * 2}s ease-out ${i * 0.25}s forwards;`;
+            p.textContent = em;
+            document.body.appendChild(p);
+            setTimeout(() => p.remove(), 8000);
+          },
+        );
+      }
+
+      /* WIN CLOSE */
+      document.getElementById("wclose").addEventListener("click", () => {
+        win.classList.remove("on");
+        inp.value = "";
+        isLocked = false;
+        btn.classList.remove("locked");
+        btn.textContent = "🐽 Submit Answer";
+        crown.setAttribute("opacity", "0");
+        mth.setAttribute("d", "M50 93 Q60 102 70 93");
+        pig.className = "pig-svg";
+        inp.className = "";
+        progFill.style.width = "0%";
+        msg.textContent =
+          "👆 The button has opinions. Choose your words wisely.";
+        placeBtn(window.innerWidth / 2 - 80, window.innerHeight - 120);
+      });
+
+      /* HINT HOVER */
+      document.querySelectorAll(".htag").forEach((t) => {
+        t.addEventListener("mouseenter", () => {
+          const r = [
+            "Not even close! 😂",
+            "WRONG! 🐷",
+            "Try PIGGYME 👀",
+            "Absolutely not 💅",
+            "Think pink! 🐽",
+            "The pig is judging you 😤",
+          ];
+          msg.textContent = r[Math.floor(Math.random() * r.length)];
+        });
+      });
+
+      /* RESIZE */
+      window.addEventListener("resize", () => {
+        if (!isLocked) placeBtn(btnX, btnY);
+      });
+    </script>
+  </body>
+</html>
